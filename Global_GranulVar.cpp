@@ -171,19 +171,6 @@ int main(int argc, char *argv[]) {
 			}
 		}
 		
-		
-		
-		
-		
-		/*cout << "MAtrix envio: " << endl;
-		for(int i =0; i<filasEnvio; i++){
-		for(int j=0;j<columnasEnvio+2;j++){
-		cout << matrixEnvio[i][j] << " ";
-		}
-		cout << endl;
-		}*/
-		
-		
 		tPreCom = MPI_Wtime();
 		MPI_Bcast(&tamanioBufferRecv,1,MPI_INT,0,MPI_COMM_WORLD); //se envia el tamaño del buffer de recepcion necesario para que los workers lo creen
 		tPostCom = MPI_Wtime();
@@ -232,24 +219,18 @@ int main(int argc, char *argv[]) {
 				for(int i=0;i<nprocesos-1;i++){         //elige al primer worker PREPARADO y le avisa que se prepare y le da trabajo
 					if(workers[i] == PREPARADO){
 						int estadoEnviar = PREPARADO;
-						
 						tPreCom = MPI_Wtime();
 						MPI_Send(&estadoEnviar,1,MPI_INT,i+1,120,MPI_COMM_WORLD);  //le manda el aviso preparate al worker
 						tPostCom = MPI_Wtime();
 						acumTime += (tPostCom-tPreCom);
 						
-						cout << "MASTER- Envio senial PREPARADO a worker " << i+1 << endl;
-						cout << "MASTER- Envio matriz trabajo a worker ";
-						cout << i+1 << " Datos : ";
 						int* arregloEnvio = (int*)malloc(sizeof(int)*tamanioBufferRecv*GRANULARIDAD);
 						int cont = 0;
 						for(int n =0;n<GRANULARIDAD;n++){
 							for(int j=0;j<columnasEnvio+2;j++){
-								cout << matrixEnvio[trabajoTtal-filasEnvio+n][j] << " ";
 								arregloEnvio[cont] = matrixEnvio[trabajoTtal-filasEnvio+n][j];
 								++cont;
 							}
-							cout << endl;
 						}
 						
 						tPreCom = MPI_Wtime();
@@ -308,26 +289,14 @@ int main(int argc, char *argv[]) {
 		MPI_Status status;
 		MPI_Bcast(&tamanioBufferRecv,1,MPI_INT,0,MPI_COMM_WORLD);  //recibimos el tamaño del buffer esperado 
 		
-		//cout << "Worker " << myId << "- Recibo Bcast: " << tamanioBufferRecv << endl;
-		
 		int* recep = (int*)malloc(sizeof(int)*tamanioBufferRecv*GRANULARIDAD);
 		
 		while(estado != DORMIR){   // mientras no me manden a DORMIR trabajo
 			
 			MPI_Recv(&estado,1,MPI_INT,0,120,MPI_COMM_WORLD,&status); //recibe el estado en el que lo pone el master
 			
-			//cout << "Worker " << myId << "- Mi Estado: " << estado << endl;
-			
 			if(estado != DORMIR){   //si no lo manda a DORMIR trabaja
 				MPI_Recv(recep,tamanioBufferRecv*GRANULARIDAD,MPI_INT,0,420,MPI_COMM_WORLD,&status); //recibe los datos a trabajar
-				
-				cout << "Worker " << myId << "- Recibo trabajo: ";
-				for(int i = 0;i<GRANULARIDAD;i++){
-					for(int j=0;j<tamanioBufferRecv;j++){
-						cout << recep[(i*tamanioBufferRecv)+j] << " ";
-					}
-					cout << endl;
-				}
 				
 				for(int j=0;j<GRANULARIDAD;j++){
 					for(int i=0;i<(tamanioBufferRecv-2)/2;i++){                                //se hace el calculo
@@ -339,8 +308,6 @@ int main(int argc, char *argv[]) {
 					acumu=0;
 				}
 				MPI_Send(resultado,3*GRANULARIDAD,MPI_INT,0,320,MPI_COMM_WORLD);  //envia el resultado
-				
-				//cout << "Worker " << myId << "- Envio resultado " << "[" << resultado[1] << "][" << resultado[2] << "]=" << resultado[0] << endl;
 				
 				acumu = 0;
 			}
