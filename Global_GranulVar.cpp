@@ -239,6 +239,7 @@ int main(int argc, char *argv[]) {
 						acumTime += (tPostCom-tPreCom);
 						filasEnvio = filasEnvio - GRANULARIDAD;           //se resta uno a la cantidad de trabajo
 						workers[i] = OCUPADO;    // se pone al worker al que se le envio trabajo en estado OCUPADO
+						free(arregloEnvio);
 						break;
 					}
 				}
